@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mapsFragment">
+
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="at.sunilson.stylishmaps.maps.MapsFragment"
+        android:label="MapsFragment"
+        tools:layout="@layout/fragment_maps">
+        <action
+            android:id="@+id/action_mapsFragment_to_stylePickerBottomSheet"
+            app:destination="@id/stylePickerBottomSheet" />
+    </fragment>
+    <dialog
+        android:id="@+id/stylePickerBottomSheet"
+        android:name="at.sunilson.stylishmaps.maps.stylePicker.StylePickerBottomSheet"
+        android:label="StylePickerBottomSheet"
+        tools:layout="@layout/bottom_sheet_style_picker" />
+</navigation>

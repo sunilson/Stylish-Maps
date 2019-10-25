@@ -1,11 +1,20 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textViewStyle">@style/BaseText</item>
+        <item name="android:editTextStyle">@style/BaseEditText</item>
     </style>
 
+    <style name="BaseText" parent="Widget.MaterialComponents.TextView">
+        <item name="android:fontFamily">@font/brown_std_regular</item>
+    </style>
+
+    <style name="BaseEditText" parent="Widget.AppCompat.EditText">
+        <item name="android:fontFamily">@font/brown_std_regular</item>
+    </style>
 </resources>

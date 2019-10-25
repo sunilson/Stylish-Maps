@@ -13,10 +13,22 @@
         <action
             android:id="@+id/action_mapsFragment_to_stylePickerBottomSheet"
             app:destination="@id/stylePickerBottomSheet" />
+        <action
+            android:id="@+id/move_to_export"
+            app:destination="@id/exportFragment"
+            app:enterAnim="@anim/move_in_from_right"
+            app:exitAnim="@anim/move_out_to_left_slightly"
+            app:popEnterAnim="@anim/move_in_from_left_slightly"
+            app:popExitAnim="@anim/move_out_to_right" />
     </fragment>
     <dialog
         android:id="@+id/stylePickerBottomSheet"
         android:name="at.sunilson.stylishmaps.maps.stylePicker.StylePickerBottomSheet"
         android:label="StylePickerBottomSheet"
         tools:layout="@layout/bottom_sheet_style_picker" />
+    <fragment
+        android:id="@+id/exportFragment"
+        android:name="at.sunilson.stylishmaps.export.ExportFragment"
+        tools:layout="@layout/fragment_export"
+        android:label="ExportFragment" />
 </navigation>

@@ -18,5 +18,6 @@ data class SearchFeature(
     @SerializedName("place_type")
     val placetype: List<String>,
     val relevance: Float,
-    val properties: Map<String, String>
+    val properties: Map<String, String>,
+    val center: List<Double>
 )

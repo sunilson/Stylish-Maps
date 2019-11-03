@@ -67,7 +67,8 @@ abstract class BaseFragment : Fragment() {
         @ColorRes navColor: Int = statusColor,
         darkStatus: Boolean = true,
         darkNav: Boolean = darkStatus,
-        transparent: Boolean = false
+        transparent: Boolean = false,
+        onlyStatusTransparent: Boolean = false
     ) {
         activity?.let { activity ->
             //Make bars opaque again
@@ -77,11 +78,15 @@ abstract class BaseFragment : Fragment() {
 
             //Set status and nav bar transparent and draw content below
             if (transparent) {
-                activity.window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
                 activity.window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                if (!onlyStatusTransparent) {
+                    activity.window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+                } else {
+                    activity.window.navigationBarColor =
+                        ContextCompat.getColor(activity, statusColor)
+                }
                 activity.window.decorView.systemUiVisibility =
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     activity.window.decorView.systemUiVisibility =
                         activity.window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
@@ -89,7 +94,8 @@ abstract class BaseFragment : Fragment() {
                 return
             }
 
-            activity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            activity.window.decorView.systemUiVisibility =
+                activity.window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
             //Set colors
             activity.window.navigationBarColor = ContextCompat.getColor(activity, navColor)

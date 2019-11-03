@@ -16,5 +16,5 @@ val dataModule = module {
             .build()
             .create(RetrofitService::class.java)
     }
-    single<Repository> { RepositoryImpl(get()) }
+    single<Repository> { RepositoryImpl(get(), get()) }
 }

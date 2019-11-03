@@ -5,5 +5,5 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val exportModule = module {
-    viewModel<ExportViewModel> { ExportViewModelImpl(get(named("mapToken"))) }
+    viewModel<ExportViewModel> { ExportViewModelImpl(get()) }
 }

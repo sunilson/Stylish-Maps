@@ -3,4 +3,6 @@
     <string name="google_maps_token">AIzaSyDtuCyqTCgOMw2WVtpinhyLPRQ8fd--fzE</string>
     <string name="enter_search_term">Suchbegriff eingeben...</string>
     <string name="choose_a_style">Choose a style</string>
+    <string name="download_finished">Saved image to gallery!</string>
+    <string name="download_failed">Could not save image to gallery!</string>
 </resources>

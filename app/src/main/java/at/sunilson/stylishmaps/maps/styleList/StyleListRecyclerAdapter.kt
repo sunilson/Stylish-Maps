@@ -12,8 +12,7 @@ import com.google.android.gms.maps.model.MapStyleOptions
 
 class StyleListRecyclerAdapter(
     private val onStyleClicked: (MapStyle) -> Unit
-) :
-    BaseRecyclerAdapter<MapStyle, StyleListItemBinding>() {
+) : BaseRecyclerAdapter<MapStyle, StyleListItemBinding>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = DataBindingUtil.inflate<StyleListItemBinding>(

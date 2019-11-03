@@ -41,7 +41,8 @@ fun ImageView.fromUrl(url: String?) {
 }
 
 @BindingAdapter("app:entries")
-fun <T> RecyclerView.setEntries(entries: List<T>) {
+fun <T> RecyclerView.setEntries(entries: List<T>?) {
+    if (entries == null) return
     (adapter as? BaseRecyclerAdapter<T, *>)?.setItems(entries)
 }
 
@@ -68,7 +69,12 @@ fun ImageView.bindSrc(bitmap: Bitmap) {
     setImageBitmap(bitmap)
 }
 
-@BindingAdapter("app:fromBitmap")
-fun CropImageView.fromBitmap(bitmap: Bitmap) {
-    setImageBitmap(bitmap)
+@BindingAdapter("app:fromUri")
+fun ImageView.fromUri(uri: Uri) {
+    Glide.with(context).load(uri).into(this)
+}
+
+@BindingAdapter("app:fromUri")
+fun CropImageView.fromBitmap(uri: Uri) {
+    setImageUriAsync(uri)
 }

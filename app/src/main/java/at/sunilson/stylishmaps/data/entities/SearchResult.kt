@@ -1,3 +1,3 @@
 package at.sunilson.stylishmaps.data.entities
 
-data class SearchResult(val name: String)
+data class SearchResult(val name: String, val location: Location)

@@ -21,7 +21,9 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import at.sunilson.stylishmaps.R
 import at.sunilson.stylishmaps.base.BaseFragment
+import at.sunilson.stylishmaps.data.entities.Location
 import at.sunilson.stylishmaps.databinding.FragmentMapsBinding
+import at.sunilson.stylishmaps.maps.searchList.SearchListRecyclerAdapter
 import at.sunilson.stylishmaps.maps.styleList.StyleListRecyclerAdapter
 import at.sunilson.stylishmaps.utils.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -35,7 +37,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import kotlinx.android.synthetic.main.fragment_maps.*
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class MapsFragment : BaseFragment(), OnMapReadyCallback {
@@ -44,7 +48,7 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         get() = BottomSheetBehavior.from(style_picker_sheet)
 
     private var googleMap: GoogleMap? = null
-    private val viewModel: MapsViewModel by sharedViewModel()
+    private val viewModel: MapsViewModel by viewModel()
     private var hidden: Boolean = false
     private var currentAnimator: AnimatorSet? = null
 
@@ -70,8 +74,10 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         observeCommands()
         observeBottomSheet()
         observeStyle()
+        observeLocation()
         setupMap()
         setupStylesList()
+        setupSearchList()
     }
 
     private fun checkPermissions() {
@@ -127,6 +133,10 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         })
     }
 
+    private fun setupSearchList() {
+        search_list.adapter = SearchListRecyclerAdapter { viewModel.searchResultSelected(it) }
+    }
+
     private fun setupStylesList() {
         styles_list.setItemViewCacheSize(30)
         styles_list.setHasFixedSize(true)
@@ -144,21 +154,30 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
-
-        googleMap.setOnMapClickListener {
-            map_search_input.hideKeyboard()
-            map_search_input.clearFocus()
-            currentAnimator?.cancel()
-            currentAnimator = AnimatorSet().apply {
-                playTogether(
-                    map_search.generateAnimator(hidden, true),
-                    fab_design.generateAnimator(hidden),
-                    fab_export.generateAnimator(hidden)
+        googleMap.setOnMapClickListener { hideMapUi() }
+        viewModel.style.value?.let {
+            googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireContext(),
+                    it.jsonResource
                 )
-                duration = 200
-                start()
-                hidden = !hidden
-            }
+            )
+        }
+    }
+
+    private fun hideMapUi() {
+        map_search_input.hideKeyboard()
+        map_search_input.clearFocus()
+        currentAnimator?.cancel()
+        currentAnimator = AnimatorSet().apply {
+            playTogether(
+                map_search.generateAnimator(hidden, true),
+                fab_design.generateAnimator(hidden),
+                fab_export.generateAnimator(hidden)
+            )
+            duration = 200
+            start()
+            hidden = !hidden
         }
     }
 
@@ -190,18 +209,24 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         viewModel.commands.observe(viewLifecycleOwner, Observer {
             Do exhaustive when (it) {
                 MapsCommands.ChooseStyle -> stylePicker.state = STATE_COLLAPSED
-                MapsCommands.TakePicture -> {
-                    googleMap?.snapshot {
-                        viewModel.currentCapture.value = it
-                        findNavController().navigate(R.id.move_to_export)
-                    }
-                }
-                is MapsCommands.MoveMap -> googleMap?.animateCamera(
-                    CameraUpdateFactory.newCameraPosition(
-                        CameraPosition(LatLng(it.lat, it.lng), 10f, 0f, 0f)
+                MapsCommands.TakePicture -> googleMap?.snapshot { viewModel.pictureTaken(it) }
+                is MapsCommands.ExportPicture -> findNavController().navigate(
+                    MapsFragmentDirections.moveToExport(
+                        it.uri.toString()
                     )
                 )
             }
+        })
+    }
+
+    private fun observeLocation() {
+        viewModel.currentLocation.observe(viewLifecycleOwner, Observer {
+            hideMapUi()
+            googleMap?.animateCamera(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition(LatLng(it.lat, it.lng), 14f, 0f, 0f)
+                )
+            )
         })
     }
 
@@ -214,6 +239,35 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
                 )
             )
         })
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        if (savedInstanceState == null) return
+
+        savedInstanceState.getInt("style", -1).let {
+            viewModel.restoreStyleFromResource(it)
+        }
+
+        savedInstanceState.getDouble("lat", 100.0).let { lat ->
+            if (lat != 100.0) {
+                savedInstanceState.getDouble("lng", 200.0).let { lng ->
+                    if (lng != 200.0) {
+                        viewModel.currentLocation.value = Location(lat, lng)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        viewModel.style.value?.jsonResource?.let { outState.putInt("style", it) }
+        viewModel.currentLocation.value?.let {
+            outState.putDouble("lat", it.lat)
+            outState.putDouble("lng", it.lng)
+        }
     }
 
     override fun onResume() {

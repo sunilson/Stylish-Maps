@@ -73,8 +73,6 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         stylePicker.state = STATE_HIDDEN
         observeCommands()
         observeBottomSheet()
-        observeStyle()
-        observeLocation()
         setupMap()
         setupStylesList()
         setupSearchList()
@@ -142,7 +140,7 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         styles_list.setHasFixedSize(true)
         styles_list.adapter = StyleListRecyclerAdapter {
             stylePicker.state = STATE_HIDDEN
-            viewModel.style.value = it
+            viewModel.setStyle(it)
         }
     }
 
@@ -155,14 +153,7 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
         googleMap.setOnMapClickListener { hideMapUi() }
-        viewModel.style.value?.let {
-            googleMap.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                    requireContext(),
-                    it.jsonResource
-                )
-            )
-        }
+        viewModel.currentState.style?.let { viewModel.setStyle(it) }
     }
 
     private fun hideMapUi() {
@@ -215,29 +206,23 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
                         it.uri.toString()
                     )
                 )
+                is MapsCommands.MoveMap -> {
+                    hideMapUi()
+                    googleMap?.animateCamera(
+                        CameraUpdateFactory.newCameraPosition(
+                            CameraPosition(LatLng(it.location.lat, it.location.lng), 14f, 0f, 0f)
+                        )
+                    )
+                }
+                is MapsCommands.SetMapStyle -> {
+                    googleMap?.setMapStyle(
+                        MapStyleOptions.loadRawResourceStyle(
+                            requireContext(),
+                            it.style.jsonResource
+                        )
+                    )
+                }
             }
-        })
-    }
-
-    private fun observeLocation() {
-        viewModel.currentLocation.observe(viewLifecycleOwner, Observer {
-            hideMapUi()
-            googleMap?.animateCamera(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition(LatLng(it.lat, it.lng), 14f, 0f, 0f)
-                )
-            )
-        })
-    }
-
-    private fun observeStyle() {
-        viewModel.style.observe(viewLifecycleOwner, Observer {
-            googleMap?.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                    requireContext(),
-                    it.jsonResource
-                )
-            )
         })
     }
 
@@ -254,7 +239,7 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
             if (lat != 100.0) {
                 savedInstanceState.getDouble("lng", 200.0).let { lng ->
                     if (lng != 200.0) {
-                        viewModel.currentLocation.value = Location(lat, lng)
+                        viewModel.setLocation(Location(lat, lng))
                     }
                 }
             }
@@ -263,8 +248,8 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        viewModel.style.value?.jsonResource?.let { outState.putInt("style", it) }
-        viewModel.currentLocation.value?.let {
+        viewModel.currentState.style?.jsonResource?.let { outState.putInt("style", it) }
+        viewModel.currentState.currentLocation?.let {
             outState.putDouble("lat", it.lat)
             outState.putDouble("lng", it.lng)
         }

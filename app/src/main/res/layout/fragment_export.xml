@@ -18,20 +18,20 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:background="#1A1A1A"
-            app:fromUri="@{viewModel.image}"
+            app:fromUri="@{viewModel.state.image}"
             app:layout_constraintBottom_toTopOf="@id/toolbar"
             app:layout_constraintTop_toTopOf="parent"
-            app:showIf="@{!viewModel.cropping}" />
+            app:showIf="@{!viewModel.state.cropping}" />
 
         <com.theartofdev.edmodo.cropper.CropImageView
             android:id="@+id/crop_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:background="#1A1A1A"
-            app:fromUri="@{viewModel.image}"
+            app:fromUri="@{viewModel.state.image}"
             app:layout_constraintBottom_toTopOf="@id/toolbar"
             app:layout_constraintTop_toTopOf="parent"
-            app:showIf="@{viewModel.cropping}" />
+            app:showIf="@{viewModel.state.cropping}" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
@@ -40,7 +40,7 @@
             android:onClick="@{() -> viewModel.finishCrop()}"
             app:layout_constraintBottom_toTopOf="@id/toolbar"
             app:layout_constraintRight_toRightOf="parent"
-            app:showIf="@{viewModel.cropping}"
+            app:showIf="@{viewModel.state.cropping}"
             app:srcCompat="@drawable/ic_done_black_24dp" />
 
         <LinearLayout

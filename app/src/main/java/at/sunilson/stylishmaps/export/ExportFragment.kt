@@ -32,7 +32,7 @@ class ExportFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.image.value = Uri.parse(args.image)
+        viewModel.setImage(Uri.parse(args.image))
     }
 
     override fun onResume() {
@@ -42,14 +42,14 @@ class ExportFragment : BaseFragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("currentImage", viewModel.image.value.toString())
+        outState.putString("currentImage", viewModel.currentState.image.toString())
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         savedInstanceState?.let {
             it.getString("currentImage")?.let {
-                viewModel.image.value = Uri.parse(it)
+                viewModel.setImage(Uri.parse(it))
             }
         }
     }

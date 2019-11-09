@@ -49,7 +49,7 @@
                     android:fontFamily="@font/brown_std_regular"
                     android:hint="@string/enter_search_term"
                     android:padding="16dp"
-                    android:text="@={viewModel.query}"
+                    android:text="@{viewModel.state.query}"
                     app:onTextChanged="@{(text) -> viewModel.search(text)}" />
 
                 <ProgressBar
@@ -58,18 +58,17 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_margin="16dp"
-                    app:showIf="@{viewModel.searching}" />
+                    app:showIf="@{viewModel.state.searching}" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/search_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:hideIf="@{viewModel.searching || viewModel.searchResults.size() == 0}"
-                    app:entries="@{viewModel.searchResults}"
+                    app:entries="@{viewModel.state.searchResults}"
+                    app:hideIf="@{viewModel.state.searching || viewModel.state.searchResults.size() == 0}"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:itemCount="10"
-                    tools:listitem="@layout/search_list_item"
-                    />
+                    tools:listitem="@layout/search_list_item" />
             </LinearLayout>
 
 

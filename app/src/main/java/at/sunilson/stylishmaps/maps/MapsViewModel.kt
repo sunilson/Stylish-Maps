@@ -18,28 +18,35 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+data class MapsState(
+    val style: MapStyle? = null,
+    val searchResults: List<SearchResult>? = null,
+    val searching: Boolean = false,
+    val query: String? = null,
+    val currentCapture: Bitmap? = null,
+    val currentLocation: Location? = null
+)
+
 sealed class MapsCommands {
     object ChooseStyle : MapsCommands()
     object TakePicture : MapsCommands()
     data class ExportPicture(val uri: Uri) : MapsCommands()
+    data class MoveMap(val location: Location) : MapsCommands()
+    data class SetMapStyle(val style: MapStyle) : MapsCommands()
 }
 
-abstract class MapsViewModel : BaseViewModel<MapsCommands>() {
-    abstract val style: MutableLiveData<MapStyle>
-    abstract val searchResults: MutableLiveData<List<SearchResult>>
-    abstract val searching: MutableLiveData<Boolean>
-    abstract val query: MutableLiveData<String>
-    abstract val styles: List<MapStyle>
-    abstract val currentCapture: MutableLiveData<Bitmap>
-    abstract val currentLocation: MutableLiveData<Location>
-
+abstract class MapsViewModel : BaseViewModel<MapsCommands, MapsState>(MapsState()) {
     abstract fun chooseStyle()
     abstract fun export()
     abstract fun locateUser()
     abstract fun searchResultSelected(searchResult: SearchResult)
     abstract fun search(query: String)
     abstract fun pictureTaken(bitmap: Bitmap)
+    abstract fun setLocation(location: Location)
+    abstract fun setStyle(mapStyle: MapStyle)
     abstract fun restoreStyleFromResource(resource: Int)
+
+    abstract val styles: List<MapStyle>
 }
 
 internal class MapsViewModelImpl(
@@ -47,33 +54,32 @@ internal class MapsViewModelImpl(
     private val locationClient: FusedLocationProviderClient,
     private val repository: Repository
 ) : MapsViewModel() {
-
-    override val style = MutableLiveData<MapStyle>()
-    override val searchResults = MutableLiveData<List<SearchResult>>()
-    override val searching = MutableLiveData<Boolean>()
-    override val query = MutableLiveData<String>()
-    override val currentCapture = MutableLiveData<Bitmap>()
-    override val currentLocation = MutableLiveData<Location>()
-
     private var searchJob: Job? = null
 
     override fun search(query: String) {
+        setState { copy(query = query) }
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(500)
-            if (query.length < 3) searchResults.value = null
+            if (query.length < 3) setState { copy(searchResults = null) }
             else {
-                searching.value = true
-                repository.searchForLocation(query).success { searchResults.value = it }
-                searching.value = false
+                setState { copy(searching = true) }
+                repository.searchForLocation(query)
+                    .success { setState { copy(searchResults = it) } }
+                setState { copy(searching = false) }
             }
         }
     }
 
     override fun searchResultSelected(searchResult: SearchResult) {
-        currentLocation.value = searchResult.location
-        searchResults.value = null
-        query.value = null
+        commands.value = MapsCommands.MoveMap(searchResult.location)
+        setState {
+            copy(
+                currentLocation = searchResult.location,
+                searchResults = null,
+                query = null
+            )
+        }
     }
 
     override fun chooseStyle() {
@@ -87,13 +93,29 @@ internal class MapsViewModelImpl(
     override fun locateUser() {
         locationClient.lastLocation.addOnSuccessListener {
             if (it != null) {
-                currentLocation.value = Location(it.latitude, it.longitude)
+                val location = Location(it.latitude, it.longitude)
+                commands.value = MapsCommands.MoveMap(location)
+                setState { copy(currentLocation = location) }
+            }
+        }
+    }
+
+    override fun setLocation(location: Location) {
+        commands.value = MapsCommands.MoveMap(location)
+        setState { copy(currentLocation = location) }
+    }
+
+    override fun setStyle(mapStyle: MapStyle) {
+        getState {
+            if (mapStyle != it.style) {
+                commands.value = MapsCommands.SetMapStyle(mapStyle)
+                setState { copy(style = mapStyle) }
             }
         }
     }
 
     override fun restoreStyleFromResource(resource: Int) {
-        style.value = styles.firstOrNull { it.jsonResource == resource } ?: return
+        setState { copy(style = styles.firstOrNull { it.jsonResource == resource }) }
     }
 
     override fun pictureTaken(bitmap: Bitmap) {
@@ -104,7 +126,6 @@ internal class MapsViewModelImpl(
                 },
                 {
                     //TODO
-                    val test = ""
                 }
             )
         }

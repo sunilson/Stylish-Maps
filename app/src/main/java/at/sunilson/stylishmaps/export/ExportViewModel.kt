@@ -9,6 +9,11 @@ import at.sunilson.stylishmaps.base.BaseViewModel
 import at.sunilson.stylishmaps.data.Repository
 import kotlinx.coroutines.launch
 
+data class ExportState(
+    val image: Uri? = null,
+    val cropping: Boolean = false
+)
+
 sealed class ExportCommand {
     object CropImage : ExportCommand()
     data class ShowToast(val text: Int) : ExportCommand()
@@ -17,10 +22,7 @@ sealed class ExportCommand {
     data class SetWallpaper(val bitmap: Bitmap) : ExportCommand()
 }
 
-abstract class ExportViewModel : BaseViewModel<ExportCommand>() {
-    abstract val image: MutableLiveData<Uri>
-    abstract val cropping: MutableLiveData<Boolean>
-
+abstract class ExportViewModel : BaseViewModel<ExportCommand, ExportState>(ExportState()) {
     abstract fun setWallpaper()
     abstract fun share()
     abstract fun startCrop()
@@ -28,57 +30,59 @@ abstract class ExportViewModel : BaseViewModel<ExportCommand>() {
     abstract fun download()
     abstract fun saveToDownload()
     abstract fun processBitmap(bitmap: Bitmap)
+    abstract fun setImage(uri: Uri)
 }
 
 internal class ExportViewModelImpl(private val repository: Repository) : ExportViewModel() {
-    override val image = MutableLiveData<Uri>()
-    override val cropping = MutableLiveData<Boolean>()
+
+    override fun setImage(uri: Uri) {
+        setState { copy(image = uri) }
+    }
 
     override fun share() {
-        commands.value = ExportCommand.ShareUri(image.value ?: return)
+        getState {
+            commands.value = ExportCommand.ShareUri(it.image ?: return@getState)
+        }
     }
 
     override fun saveToDownload() {
-        viewModelScope.launch {
-            repository.saveToGallery(image.value ?: return@launch).fold(
+        getState {
+            repository.saveToGallery(it.image ?: return@getState).fold(
                 { commands.value = ExportCommand.ShowToast(R.string.download_finished) },
-                {commands.value = ExportCommand.ShowToast(R.string.download_finished)}
+                { commands.value = ExportCommand.ShowToast(R.string.download_finished) }
             )
         }
     }
 
     override fun download() {
-        cropping.value = false
-        commands.value = ExportCommand.DownloadUri(image.value ?: return)
+        getState {
+            setState { copy(cropping = false) }
+            commands.value = ExportCommand.DownloadUri(it.image ?: return@getState)
+        }
     }
 
     override fun startCrop() {
-        cropping.value = true
+        setState { copy(cropping = true) }
     }
 
     override fun finishCrop() {
-        cropping.value = false
+        setState { copy(cropping = false) }
         commands.value = ExportCommand.CropImage
     }
 
     override fun processBitmap(bitmap: Bitmap) {
-        viewModelScope.launch {
+        setState {
             repository.cacheImage(bitmap).fold(
-                {
-                    image.value = it
-                },
-                {
-                    //TODO
-                }
+                { copy(image = it) },
+                { this }
             )
         }
     }
 
     override fun setWallpaper() {
-        cropping.value = false
-        val uri = image.value ?: return
-        viewModelScope.launch {
-            repository.getImage(uri).fold(
+        getState {
+            setState { copy(cropping = false) }
+            repository.getImage(it.image ?: return@getState).fold(
                 {
                     commands.value = ExportCommand.SetWallpaper(it)
                 },

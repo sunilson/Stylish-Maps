@@ -10,9 +10,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
 import androidx.core.content.FileProvider
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import at.sunilson.stylishmaps.R
 import at.sunilson.stylishmaps.base.BaseFragment
@@ -33,6 +36,11 @@ class ExportFragment : BaseFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.setImage(Uri.parse(args.image))
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                viewModel.backPressed()
+            }
+        })
     }
 
     override fun onResume() {
@@ -125,6 +133,7 @@ class ExportFragment : BaseFragment() {
                     }
                     crop_view.getCroppedImageAsync()
                 }
+                ExportCommand.NavigateBack -> findNavController().navigateUp()
             }
         })
     }

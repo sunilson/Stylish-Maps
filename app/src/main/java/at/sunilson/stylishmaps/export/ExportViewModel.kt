@@ -16,6 +16,7 @@ data class ExportState(
 
 sealed class ExportCommand {
     object CropImage : ExportCommand()
+    object NavigateBack : ExportCommand()
     data class ShowToast(val text: Int) : ExportCommand()
     data class ShareUri(val uri: Uri) : ExportCommand()
     data class DownloadUri(val uri: Uri) : ExportCommand()
@@ -31,9 +32,19 @@ abstract class ExportViewModel : BaseViewModel<ExportCommand, ExportState>(Expor
     abstract fun saveToDownload()
     abstract fun processBitmap(bitmap: Bitmap)
     abstract fun setImage(uri: Uri)
+    abstract fun backPressed()
 }
 
 internal class ExportViewModelImpl(private val repository: Repository) : ExportViewModel() {
+
+    override fun backPressed() {
+        getState {
+            when {
+                it.cropping -> setState { copy(cropping = false) }
+                else -> commands.value = ExportCommand.NavigateBack
+            }
+        }
+    }
 
     override fun setImage(uri: Uri) {
         setState { copy(image = uri) }

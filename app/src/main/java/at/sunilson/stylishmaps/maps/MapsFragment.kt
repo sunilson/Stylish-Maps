@@ -19,6 +19,7 @@ import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import at.sunilson.stylishmaps.R
 import at.sunilson.stylishmaps.base.BaseFragment
 import at.sunilson.stylishmaps.data.entities.Location
@@ -34,11 +35,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
+import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 import kotlinx.android.synthetic.main.fragment_maps.*
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -136,8 +134,6 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     private fun setupStylesList() {
-        styles_list.setItemViewCacheSize(30)
-        styles_list.setHasFixedSize(true)
         styles_list.adapter = StyleListRecyclerAdapter {
             stylePicker.state = STATE_HIDDEN
             viewModel.setStyle(it)
@@ -199,7 +195,18 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
     private fun observeCommands() {
         viewModel.commands.observe(viewLifecycleOwner, Observer {
             Do exhaustive when (it) {
-                MapsCommands.ChooseStyle -> stylePicker.state = STATE_COLLAPSED
+                is MapsCommands.ChooseStyle -> {
+                    if (it.currentStyle != null) {
+                        stylePicker.state = STATE_EXPANDED
+                    } else {
+                        stylePicker.state = STATE_COLLAPSED
+                    }
+                    (styles_list.layoutManager as GridLayoutManager).scrollToPositionWithOffset(
+                        (styles_list.adapter as StyleListRecyclerAdapter).getPositionForItem(
+                            it.currentStyle ?: return@Observer
+                        ), 0
+                    )
+                }
                 MapsCommands.TakePicture -> googleMap?.snapshot { viewModel.pictureTaken(it) }
                 is MapsCommands.ExportPicture -> findNavController().navigate(
                     MapsFragmentDirections.moveToExport(
@@ -218,7 +225,7 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
                     googleMap?.setMapStyle(
                         MapStyleOptions.loadRawResourceStyle(
                             requireContext(),
-                            it.style.jsonResource
+                            it.style
                         )
                     )
                 }
@@ -248,7 +255,7 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        viewModel.currentState.style?.jsonResource?.let { outState.putInt("style", it) }
+        viewModel.currentState.style?.let { outState.putInt("style", it) }
         viewModel.currentState.currentLocation?.let {
             outState.putDouble("lat", it.lat)
             outState.putDouble("lng", it.lng)

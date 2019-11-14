@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 abstract class BaseRecyclerAdapter<T, Binding : ViewDataBinding>(initialData: List<T> = listOf()) :
     RecyclerView.Adapter<BaseRecyclerAdapter<T, Binding>.ViewHolder>() {
 
-    private val _data = mutableListOf<T>()
+    protected val _data = mutableListOf<T>()
 
     init {
         setItems(initialData)
@@ -27,7 +27,10 @@ abstract class BaseRecyclerAdapter<T, Binding : ViewDataBinding>(initialData: Li
 
     abstract fun bind(binding: Binding, obj: T)
 
-    open inner class ViewHolder(private val binding: Binding) : RecyclerView.ViewHolder(binding.root) {
+    fun getPositionForItem(item: T) = _data.indexOf(item)
+
+    open inner class ViewHolder(private val binding: Binding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(obj: T) {
             bind(binding, obj)
             binding.executePendingBindings()

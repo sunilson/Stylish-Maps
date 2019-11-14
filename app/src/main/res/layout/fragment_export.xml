@@ -38,10 +38,12 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:onClick="@{() -> viewModel.finishCrop()}"
+            app:backgroundTint="@color/white"
             app:layout_constraintBottom_toTopOf="@id/toolbar"
             app:layout_constraintRight_toRightOf="parent"
             app:showIf="@{viewModel.state.cropping}"
-            app:srcCompat="@drawable/ic_done_black_24dp" />
+            app:srcCompat="@drawable/ic_done_black_24dp"
+            app:tint="@color/text_color" />
 
         <LinearLayout
             android:id="@+id/toolbar"
@@ -78,8 +80,8 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:onClick="@{() -> viewModel.download()}"
                 android:background="?selectableItemBackgroundBorderless"
+                android:onClick="@{() -> viewModel.download()}"
                 android:src="@drawable/ic_file_download_black_24dp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,28 +29,48 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/map_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:background="@drawable/search_background"
                 android:elevation="10dp"
-                android:orientation="vertical"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <EditText
                     android:id="@+id/map_search_input"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:drawableStart="@drawable/ic_search_black_24dp"
                     android:drawablePadding="16dp"
+                    android:drawableTint="@color/icon_color"
                     android:fontFamily="@font/brown_std_regular"
                     android:hint="@string/enter_search_term"
+                    android:maxLines="1"
                     android:padding="16dp"
                     android:text="@{viewModel.state.query}"
+                    android:textColor="@color/text_color"
+                    android:textColorHint="@color/icon_color"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/map_search_input_cancel"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:onTextChanged="@{(text) -> viewModel.search(text)}" />
+
+                <ImageButton
+                    android:id="@+id/map_search_input_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:onClick="@{() -> viewModel.cancelSearch()}"
+                    android:src="@drawable/ic_close_black_24dp"
+                    android:tint="@color/text_color"
+                    app:hideIf="@{viewModel.state.query == null || viewModel.state.query.length == 0}"
+                    app:layout_constraintBottom_toBottomOf="@id/map_search_input"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/map_search_input" />
 
                 <ProgressBar
                     android:id="@+id/search_indicator"
@@ -58,18 +78,27 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_margin="16dp"
+                    android:indeterminateTint="@color/text_color"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/map_search_input"
                     app:showIf="@{viewModel.state.searching}" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/search_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:overScrollMode="never"
+                    android:paddingBottom="16dp"
                     app:entries="@{viewModel.state.searchResults}"
                     app:hideIf="@{viewModel.state.searching || viewModel.state.searchResults.size() == 0}"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/map_search_input"
                     tools:itemCount="10"
                     tools:listitem="@layout/search_list_item" />
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -78,10 +107,11 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:onClick="@{() -> viewModel.chooseStyle()}"
+                app:backgroundTint="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:srcCompat="@drawable/ic_palette_white_24dp"
-                app:tint="@android:color/white" />
+                app:tint="@color/text_color" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_export"
@@ -89,17 +119,18 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:onClick="@{() -> viewModel.export()}"
+                app:backgroundTint="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:srcCompat="@drawable/ic_done_black_24dp"
-                app:tint="@android:color/white" />
+                app:tint="@color/text_color" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View
             android:id="@+id/backdrop"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#99000000"
+            android:background="@color/backdrop"
             android:clickable="true"
             android:focusable="false"
             android:focusableInTouchMode="false"
@@ -137,6 +168,7 @@
                     android:fontFamily="@font/brown_std_bold"
                     android:text="@string/choose_a_style"
                     android:textAlignment="center"
+                    android:textColor="@color/text_color"
                     android:textSize="24sp" />
 
                 <androidx.recyclerview.widget.RecyclerView

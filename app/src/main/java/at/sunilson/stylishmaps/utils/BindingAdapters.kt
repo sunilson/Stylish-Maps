@@ -70,11 +70,11 @@ fun ImageView.bindSrc(bitmap: Bitmap) {
 }
 
 @BindingAdapter("app:fromUri")
-fun ImageView.fromUri(uri: Uri) {
-    Glide.with(context).load(uri).into(this)
+fun ImageView.fromUri(uri: Uri?) {
+   if(uri != null) Glide.with(context).load(uri).into(this)
 }
 
 @BindingAdapter("app:fromUri")
-fun CropImageView.fromBitmap(uri: Uri) {
-    setImageUriAsync(uri)
+fun CropImageView.fromUri(uri: Uri?) {
+    if(uri != null) setImageUriAsync(uri)
 }

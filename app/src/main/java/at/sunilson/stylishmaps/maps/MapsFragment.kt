@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import at.sunilson.stylishmaps.R
@@ -37,13 +38,17 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 import kotlinx.android.synthetic.main.fragment_maps.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class MapsFragment : BaseFragment(), OnMapReadyCallback {
 
     private val stylePicker: BottomSheetBehavior<ConstraintLayout>
-        get() = BottomSheetBehavior.from(style_picker_sheet)
+        get() = from(style_picker_sheet)
 
     private var googleMap: GoogleMap? = null
     private val viewModel: MapsViewModel by viewModel()
@@ -134,9 +139,13 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     private fun setupStylesList() {
-        styles_list.adapter = StyleListRecyclerAdapter {
-            stylePicker.state = STATE_HIDDEN
-            viewModel.setStyle(it)
+        lifecycleScope.launch(Dispatchers.Main) {
+            delay(500)
+            styles_list.adapter = StyleListRecyclerAdapter {
+                stylePicker.state = STATE_HIDDEN
+                viewModel.setStyle(it)
+            }
+            styles_list.setEntries(viewModel.styles)
         }
     }
 

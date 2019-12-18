@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "847006840599",
+    "firebase_url": "https://stylish-maps.firebaseio.com",
+    "project_id": "stylish-maps",
+    "storage_bucket": "stylish-maps.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:847006840599:android:499328994a69804b78a952",
+        "android_client_info": {
+          "package_name": "at.sunilson.stylishmaps"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "847006840599-e5obkhqagnmg1ksmnof32vbuk2amiu17.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtuCyqTCgOMw2WVtpinhyLPRQ8fd--fzE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "847006840599-e5obkhqagnmg1ksmnof32vbuk2amiu17.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

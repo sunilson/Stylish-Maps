@@ -178,7 +178,6 @@
                     android:layout_marginTop="10dp"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    app:entries="@{viewModel.styles}"
                     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                     app:spanCount="2"
                     tools:itemCount="10"

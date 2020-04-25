@@ -14,26 +14,27 @@
     </data>
 
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <androidx.fragment.app.FragmentContainerView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/google_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/motion_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/google_map"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/map_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
+                android:layout_margin="@dimen/search_margin_top"
                 android:background="@drawable/search_background"
                 android:elevation="10dp"
                 app:layout_constraintTop_toTopOf="parent">
@@ -100,12 +101,11 @@
                     tools:listitem="@layout/search_list_item" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab_design"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
+                android:layout_margin="@dimen/fab_margin_bottom"
                 android:onClick="@{() -> viewModel.chooseStyle()}"
                 app:backgroundTint="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -117,7 +117,7 @@
                 android:id="@+id/fab_export"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
+                android:layout_margin="@dimen/fab_margin_bottom"
                 android:onClick="@{() -> viewModel.export()}"
                 app:backgroundTint="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"

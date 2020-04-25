@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="enter_search_term">Suchbegriff eingeben...</string>
+    <string name="choose_a_style">Wähle einen Style</string>
+    <string name="download_finished">Bild wurde in Gallerie gespeichert!</string>
+    <string name="download_failed">Bild konnte nicht abgespeichert werden!</string>
+    <string name="set_wallpaper">Als Wallpaper setzen</string>
+    <string name="set_wallpaper_question">Willst du dieses Bild als Wallpaper setzen?</string>
+    <string name="share_map">Map teilen</string>
+    <string name="cancel">Abbrechen</string>
+</resources>

@@ -11,18 +11,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
 import androidx.core.content.FileProvider
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import at.sunilson.stylishmaps.R
 import at.sunilson.stylishmaps.base.BaseFragment
 import at.sunilson.stylishmaps.databinding.FragmentExportBinding
-import at.sunilson.stylishmaps.utils.Do
-import at.sunilson.stylishmaps.utils.setMargins
+import at.sunilson.stylishmaps.utils.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_export.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
@@ -45,7 +43,12 @@ class ExportFragment : BaseFragment() {
 
     override fun onResume() {
         super.onResume()
-        setNavColors()
+        setStatusBarColor(android.R.color.black)
+        setNavigationBarColor(android.R.color.black)
+        drawBelowNavigationBar()
+        drawBelowStatusBar()
+        useLightStatusBarIcons(true)
+        useLightNavigationBarIcons(true)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -60,12 +63,6 @@ class ExportFragment : BaseFragment() {
                 viewModel.setImage(Uri.parse(it))
             }
         }
-    }
-
-    override fun applyInsets(insets: WindowInsetsCompat) {
-        map_result.setMargins(top = insets.systemWindowInsetTop)
-        crop_view.setMargins(top = insets.systemWindowInsetTop)
-        toolbar.setMargins(bottom = insets.systemWindowInsetBottom)
     }
 
     override fun onCreateView(
@@ -92,6 +89,19 @@ class ExportFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupInsets()
+        observeCommands()
+    }
+
+    private fun setupInsets() {
+        map_result.doOnApplyWindowInsets { _, insets, _ ->
+            map_result.setMargins(top = insets.systemWindowInsetTop)
+            crop_view.setMargins(top = insets.systemWindowInsetTop)
+            toolbar.setMargins(bottom = insets.systemWindowInsetBottom)
+        }
+    }
+
+    private fun observeCommands() {
         viewModel.commands.observe(viewLifecycleOwner, Observer {
             Do exhaustive when (it) {
                 is ExportCommand.ShowToast -> Toast.makeText(
@@ -115,16 +125,16 @@ class ExportFragment : BaseFragment() {
                         flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                         type = "image/jpeg"
                     }
-                    startActivity(Intent.createChooser(shareIntent, "Share map"))
+                    startActivity(Intent.createChooser(shareIntent, getString(R.string.share_map)))
                 }
                 is ExportCommand.SetWallpaper -> {
                     MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Set wallpaper")
-                        .setMessage("Do you really want to set this as your wallpaper?")
+                        .setTitle(getString(R.string.set_wallpaper))
+                        .setMessage(getString(R.string.set_wallpaper_question))
                         .setPositiveButton("Ok") { _, _ ->
                             WallpaperManager.getInstance(requireContext()).setBitmap(it.bitmap)
                         }
-                        .setNegativeButton("Cancel", null)
+                        .setNegativeButton(getString(R.string.cancel), null)
                         .show()
                 }
                 ExportCommand.CropImage -> {

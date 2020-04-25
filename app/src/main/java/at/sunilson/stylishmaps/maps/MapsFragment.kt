@@ -13,10 +13,7 @@ import android.view.View.TRANSLATION_Y
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.doOnEnd
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.marginBottom
-import androidx.core.view.marginTop
+import androidx.core.view.updatePadding
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -37,9 +34,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_maps.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -76,9 +73,10 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         stylePicker.state = STATE_HIDDEN
         observeCommands()
         observeBottomSheet()
-        setupMap()
         setupStylesList()
+        setupMap()
         setupSearchList()
+        setupInsets()
     }
 
     private fun checkPermissions() {
@@ -149,12 +147,6 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         }
     }
 
-    override fun applyInsets(insets: WindowInsetsCompat) {
-        map_search.setMargins(top = insets.systemWindowInsetTop + map_search.marginTop)
-        fab_design.setMargins(bottom = insets.systemWindowInsetBottom + fab_design.marginBottom)
-        fab_export.setMargins(bottom = insets.systemWindowInsetBottom + fab_export.marginBottom)
-    }
-
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
         googleMap.setOnMapClickListener { hideMapUi() }
@@ -181,7 +173,6 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         hidden: Boolean = false,
         negative: Boolean = false
     ): ObjectAnimator {
-
         val valueHolders = if (!hidden) {
             val distance = 60f.convertToPx(requireContext())
             arrayOf(
@@ -271,9 +262,24 @@ class MapsFragment : BaseFragment(), OnMapReadyCallback {
         }
     }
 
+    private fun setupInsets() {
+        motion_layout.doOnApplyWindowInsets { view, insets, initial ->
+            view.updatePadding(
+                0,
+                initial.paddings.top + insets.systemWindowInsetTop,
+                0,
+                initial.paddings.bottom + insets.systemWindowInsetBottom
+            )
+        }
+    }
+
     override fun onResume() {
         super.onResume()
-        setNavColors(transparent = true)
+        setStatusBarColor(android.R.color.transparent)
+        setNavigationBarColor(android.R.color.transparent)
+        drawBelowNavigationBar()
+        drawBelowStatusBar()
+        useLightStatusBarIcons(false)
     }
 
     companion object {

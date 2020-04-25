@@ -1,8 +1,12 @@
 <resources>
     <string name="mapbox_access_token">pk.eyJ1Ijoic3VuaWxzb24iLCJhIjoiY2sxbDEzdGFrMDB1bTNpbnlsYXlsZXRqdSJ9.UZdCqTVNC49WngBF7r_0eQ</string>
     <string name="google_maps_token">AIzaSyDtuCyqTCgOMw2WVtpinhyLPRQ8fd--fzE</string>
-    <string name="enter_search_term">Suchbegriff eingeben...</string>
+    <string name="enter_search_term">Enter search term...</string>
     <string name="choose_a_style">Choose a style</string>
     <string name="download_finished">Saved image to gallery!</string>
     <string name="download_failed">Could not save image to gallery!</string>
+    <string name="set_wallpaper">Set wallpaper</string>
+    <string name="set_wallpaper_question">Do you really want to set this as your wallpaper?</string>
+    <string name="share_map">Share map</string>
+    <string name="cancel">Cancel</string>
 </resources>
